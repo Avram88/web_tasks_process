@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+
+{% load staticfiles %}
+
+<head>
+
+	<meta charset="UTF-8">
+	<title>Tasks</title>
+	<link rel="stylesheet" href="{% static 'tasks/css/reset.css' %}">
+	<link rel="stylesheet" href="{% static 'tasks/css/style.css' %}" media="screen" type="text/css" />
+	
+</head>
+	<body>
+	<table>
+	 	<tr>
+	    	<th align="left" id="th_right">{{user.first_name}} {{user.last_name}}</th>
+	    	<th align="right" id="th_left">	    	
+				<form action="{% url 'tasks:logout' %}" method="post">
+					{% csrf_token %}
+					<input type="submit" id="logout" value="Logout" />
+				</form>
+	    	</th>
+	  	</tr>
+	  	<tr>
+	  		<td>
+	  			<table>
+	  				<tr>
+	  					<th>Tasks</th>
+	  				</tr>
+	  				<!-- tasks lists -->
+	  			</table>
+	  		</td>
+	  		<td>
+	  			<table>
+	  				<tr>
+	  					<th>Processes</th>
+	  				</tr>
+	  				<!-- processes lists -->
+	  			</table>
+	  		</td>
+	  	</tr>	  	
+	</table>	
+	</body>
+</html>

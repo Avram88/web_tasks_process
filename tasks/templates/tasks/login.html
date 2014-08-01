@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+
+{% load staticfiles %}
+
+<head>
+
+  <meta charset="UTF-8">
+  <title>Login  - Tasks</title>
+  <link rel="stylesheet" href="{% static 'tasks/css/reset.css' %}">
+  <link rel="stylesheet" href="{% static 'tasks/css/style.css' %}" media="screen" type="text/css" />
+
+</head>
+
+<body>
+
+  <div class="wrap">
+  		<form action="{% url 'tasks:sign_in' %}" method="post">
+  			{% csrf_token %}
+			<div class="avatar">
+		     	<img src="http://cdn.ialireza.me/avatar.png">
+			</div>
+			<input type="text" placeholder="username" name = "username" required>
+			<div class="bar">
+				<i></i>
+			</div>
+			<input type="password" placeholder="password" name = "password" required>
+			<a href="" class="forgot_link">forgot ?</a>
+			<input type="submit" value="Sign in" />
+		</form>
+	</div>
+
+  <script src="js/index.js"></script>
+
+</body>
+
+</html>
