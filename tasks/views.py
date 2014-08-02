@@ -1,10 +1,20 @@
 from django.shortcuts import render
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
+import glob, os
 
 @login_required
-def index(request):    
-    return render(request, 'tasks/index.html')
+def index(request):        
+    model_dir = "D:\\Fax\\master_rad\\projekat\\web_tasks_process\\tasks\\models\\"
+    ext =  "*.wf"
+    models = glob.glob(model_dir + ext)
+    
+    model_names = []
+    
+    for file_name in models:
+        model_names.append(os.path.basename(file_name)[:-3])   
+                
+    return render(request, 'tasks/index.html', {'model_names':model_names})
     
 def auth_login(request):    
     return render(request, 'tasks/login.html')

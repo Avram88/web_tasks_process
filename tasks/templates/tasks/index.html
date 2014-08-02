@@ -36,7 +36,11 @@
 	  				<tr>
 	  					<th>Processes</th>
 	  				</tr>
-	  				<!-- processes lists -->
+	  				{% for model_name in model_names %}
+	  				<tr>
+	  					<td align="center">{{ model_name }}</td>
+	  				</tr>
+	  				{% endfor %}
 	  			</table>
 	  		</td>
 	  	</tr>	  	
