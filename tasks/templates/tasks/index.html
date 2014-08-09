@@ -28,18 +28,28 @@
 	  				<tr>
 	  					<th>Tasks</th>
 	  				</tr>
-	  				<!-- tasks lists -->
+	  				{% for task in tasks %}
+	  				<tr>
+	  					<td align="center"><a href="{% url 'tasks:detail' task.id %}">{{ task.name }}</a></td>
+	  				</tr>
+	  				{% endfor %}
 	  			</table>
 	  		</td>
 	  		<td>
 	  			<table>
 	  				<tr>
-	  					<th>Processes</th>
+	  					<th align="center">Processes</th>
 	  				</tr>
-	  				{% for model_name in model_names %}
-	  				<tr>
+	  				{% for model_name in model_names %}	  				  				
+	  				<tr>	  					
 	  					<td align="center">{{ model_name }}</td>
-	  				</tr>
+	  					<td>
+	  					<form action="{% url 'tasks:start_process' model_name %}" method="post">
+	  						{% csrf_token %}
+	  						<input type="submit" id="start" value="Start" />
+	  					</form>
+	  					</td>
+	  				</tr>	  				
 	  				{% endfor %}
 	  			</table>
 	  		</td>

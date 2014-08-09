@@ -4,15 +4,13 @@ from django.contrib.auth.models import User
 class BaseModel(models.Model):
     start_date = models.DateTimeField()
     end_date = models.DateTimeField()
-    
-    user = models.ForeignKey(User)
-    
+        
     class Meta:
         abstract = True
     
 class WorkflowInst(BaseModel):
     type = models.CharField(max_length=200)
-    
+    user = models.ForeignKey(User)
     class Meta:
         db_table = 'workflow_inst'
 
@@ -24,6 +22,7 @@ class TaskInst(BaseModel):
     finished = models.BooleanField(default = False)    
     
     workflow = models.ForeignKey(WorkflowInst)
-        
+    user = models.ForeignKey(User, null=True)
+    
     class Meta:
         db_table = 'task_inst'
