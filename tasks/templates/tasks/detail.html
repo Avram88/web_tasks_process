@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="ISO-8859-1">
+<title>Task detail</title>
+</head>
+<body>
+	<table>
+	 	<tr>
+	    	<th align="left" id="th_right">{{user.first_name}} {{user.last_name}}</th>
+	    	<th align="right" id="th_left">	    	
+				<form action="{% url 'tasks:logout' %}" method="post">
+					{% csrf_token %}
+					<input type="submit" id="logout" value="Logout" />
+				</form>
+	    	</th>
+	  	</tr>
+	  	<tr>
+	  		<td>Name: {{ task.name }}</td>
+	  	</tr>
+	  	<tr>
+	  		<td>Description: {{ task.description }}</td>
+	  	</tr>
+	  	<tr>
+	  		<td>
+	  		<form action="{% url 'tasks:finish_task' task.id %}" method="post">
+		  		{% csrf_token %}
+		  		{% if next_tasks|length > 1 %}
+		  		<p>Next tasks:</p>
+		  		{% for task in next_tasks %}
+		  		<input type="radio" name="next_task_name" value="{{ task.name }}">{{ task.name }}<br>
+		  		{% endfor %}
+		  		{% endif %}		
+				<input type="submit" id="finish" value="Finish" />
+			</form>
+			</td>
+	  	</tr>
+	</table>
+</body>
+</html>
