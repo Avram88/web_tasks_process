@@ -1,59 +1,80 @@
-<!DOCTYPE html>
 <html>
 
 {% load staticfiles %}
 
 <head>
-
-	<meta charset="UTF-8">
-	<title>Tasks</title>
-	<link rel="stylesheet" href="{% static 'tasks/css/reset.css' %}">
-	<link rel="stylesheet" href="{% static 'tasks/css/style.css' %}" media="screen" type="text/css" />
-	
+<title>Tasks</title>
+<link rel="stylesheet" href="{% static 'tasks/css/style.css' %}" type="text/css" />
 </head>
-	<body>
-	<table>
-	 	<tr>
-	    	<th align="left" id="th_right">{{user.first_name}} {{user.last_name}}</th>
-	    	<th align="right" id="th_left">	    	
-				<form action="{% url 'tasks:logout' %}" method="post">
-					{% csrf_token %}
-					<input type="submit" id="logout" value="Logout" />
-				</form>
-	    	</th>
-	  	</tr>
-	  	<tr>
-	  		<td>
-	  			<table>
-	  				<tr>
-	  					<th>Tasks</th>
-	  				</tr>
-	  				{% for task in tasks %}
-	  				<tr>
-	  					<td align="center"><a href="{% url 'tasks:detail' task.id %}">{{ task.name }}</a></td>
-	  				</tr>
-	  				{% endfor %}
-	  			</table>
-	  		</td>
-	  		<td>
-	  			<table>
-	  				<tr>
-	  					<th align="center">Processes</th>
-	  				</tr>
-	  				{% for model_name in model_names %}	  				  				
-	  				<tr>	  					
-	  					<td align="center">{{ model_name }}</td>
-	  					<td>
-	  					<form action="{% url 'tasks:start_process' model_name %}" method="post">
-	  						{% csrf_token %}
-	  						<input type="submit" id="start" value="Start" />
-	  					</form>
-	  					</td>
-	  				</tr>	  				
-	  				{% endfor %}
-	  			</table>
-	  		</td>
-	  	</tr>	  	
-	</table>	
-	</body>
+
+<body>
+<div>
+  <form action="{% url 'tasks:logout' %}" method="post">
+    {% csrf_token %}
+    {{user.first_name}} {{user.last_name}}  
+    <input type="submit" id="start" value="Logout" />
+  </form>
+</div>
+
+<br>
+
+<table>
+  <tr>
+  {% if tasks|length > 1%}
+    <th colspan="2">Tasks</th>
+  {% else %}
+  	<th>Tasks</th>
+  {% endif %}
+  </tr>
+  
+  
+  {% if tasks|length > 1%}
+  {% for task in tasks %}
+  <tr>	
+	<td>{{ task.name }}</td>
+	<td style="width: 30px;">
+	  <form action="{% url 'tasks:detail' task.id %}" method="post">
+	  {% csrf_token %}
+	  <input type="submit" id="start" value="View" />
+	  </form>
+	</td>	
+	{% endfor %}
+	
+	{% else %}
+	<td><p>None</p></td>
+  </tr>	
+  {% endif %}
+    
+  
+</table>
+
+<table>
+  <tr>
+  {% if model_names|length > 1%}
+    <th colspan="2">Processes</th>
+  {% else %}
+  	<th>Processes</th>
+  {% endif %}
+  </tr>
+  
+  {% if model_names|length > 1%}
+  {% for model_name in model_names %}					  				  					
+  <tr>	
+	<td>{{ model_name }}</td>
+	<td style="width: 30px;" valign="top">
+	  <form action="{% url 'tasks:start_process' model_name %}" method="post">
+	  {% csrf_token %}
+	  <input type="submit" id="start" value="Start" />
+	  </form>
+	</td>	
+  					  				
+  {% endfor %}
+  {% else %}
+  <td><p>None</p></td>
+  </tr> 
+  {% endif %}
+  
+</table>
+
+</body>
 </html>
