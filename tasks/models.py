@@ -1,5 +1,5 @@
 from django.db import models
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Group
 
 class BaseModel(models.Model):
     start_date = models.DateTimeField()
@@ -23,6 +23,6 @@ class TaskInst(BaseModel):
     
     workflow = models.ForeignKey(WorkflowInst)
     user = models.ForeignKey(User, null=True)
-    
+    role = models.ForeignKey(Group)
     class Meta:
         db_table = 'task_inst'

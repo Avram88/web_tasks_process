@@ -16,7 +16,9 @@ def index(request):
     for file_name in models:
         model_names.append(os.path.basename(file_name)[:-3])   
                     
-    tasks = TaskInst.objects.filter(finished = False)
+    user_roles = request.user.groups.all()
+                    
+    tasks = TaskInst.objects.filter(finished = False, role = user_roles[0])
                 
     return render(request, 'tasks/index.html', {'model_names':model_names, 'tasks':tasks})
 

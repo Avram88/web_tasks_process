@@ -1,24 +1,29 @@
 from arpeggio import ZeroOrMore, Kwd, Optional, RegExMatch as _, ParserPython, \
     SemanticAction, OneOrMore, EndOfFile
 from models import WorkflowInst, TaskInst
+from django.contrib.auth.models import Group
 from django.utils import timezone
 import os
 
-def workflow():         return Kwd('workflow'), name, open_bracket, OneOrMore(task), close_bracket, EndOfFile
-def task():             return Kwd('task'), name, open_bracket, ZeroOrMore(nextTask), ZeroOrMore(grType), ZeroOrMore(endTime), ZeroOrMore(exitCondition), close_bracket
+def workflow():         return Kwd('workflow'), name, open_bracket, ZeroOrMore(role), Optional(description), OneOrMore(task), close_bracket, EndOfFile
+def task():             return Kwd('task'), name, open_bracket, ZeroOrMore(role), ZeroOrMore(nextTask), ZeroOrMore(grType), ZeroOrMore(endTime), ZeroOrMore(exitCondition), Optional(description), close_bracket
 def nextTask():         return Kwd('next'), colon, OneOrMore(name, Optional(comma)), semicomma
 def grType():           return Kwd('type'), colon, [Kwd('automatic'), Kwd('manual')], semicomma
-def endTime():          return Kwd('endTime'), colon, number, "H", semicomma
-def exitCondition():    return Kwd('exitCondition'), colon, [name, "None"], semicomma
-
+def endTime():          return Kwd('deadline'), colon, number, "H", semicomma
+def exitCondition():    return Kwd('exitCondition'), colon, name, semicomma
+def role():             return Kwd('role'), colon, OneOrMore(name, Optional(comma)), semicomma
+def description():      return Kwd('description'), colon, quote, text, quote, semicomma
+ 
 def name():             return _(r"\w+")
 def number():           return _(r"\d+")
+def text():             return _(r"[\w\s]+")
     
 def open_bracket():     return '('
 def close_bracket():    return ')'
 def colon():            return ':'
 def comma():            return ','
-def semicomma():        return ';' 
+def semicomma():        return ';'   
+def quote():            return '"' 
 
 def get_workflow_object(model_name):
     model_dir = "D:\\Fax\\master_rad\\projekat\\web_tasks_process\\tasks\\models\\"
@@ -42,6 +47,8 @@ class WorkflowSA(SemanticAction):
                 workflow.tasks.append(child)
             if isinstance(child, NameOM):   
                 workflow.name = child.value      
+            if isinstance(child, RoleOM):
+                workflow.role = child
                 
         return workflow
         
@@ -54,6 +61,8 @@ class TaskSA(SemanticAction):
                 task.name = child.value
             if isinstance(child, NextTaskOM):
                 task.next_tasks = child.names
+            if isinstance(child, RoleOM):
+                task.role = child.name
                 
         return task
     
@@ -81,6 +90,16 @@ class NextTaskSA(SemanticAction):
                 
         return nextTask
 
+class RoleSA(SemanticAction):
+    def first_pass(self, parser, node, children):   
+        role = RoleOM()
+        
+        for child in children:
+            if isinstance(child, NameOM):
+                role.name = child.value
+           
+        return role 
+
 class NameSA(SemanticAction):    
     def first_pass(self, parser, node, children):       
         return NameOM(str(node))
@@ -89,11 +108,13 @@ workflow.sem = WorkflowSA()
 task.sem = TaskSA() 
 nextTask.sem = NextTaskSA()
 name.sem = NameSA()
+role.sem = RoleSA()
 
 class WorkflowOM():
-    def __init__(self, name="", tasks=[]):
+    def __init__(self, name="", tasks=[], role = None):
         self.name = name
         self.tasks = tasks
+        self.role = role
     
     def start(self, start_user):
         """Create workflow and first task of current workflow"""
@@ -102,8 +123,14 @@ class WorkflowOM():
         workflow_inst.save()
         
         first_task_obj = self.tasks[0]        
+        
+        print first_task_obj.role
+        
+        #find group by name, __iexact for case-insensitive match
+        group = Group.objects.get(name__iexact = first_task_obj.role)
+        
         first_task_isnt = TaskInst(name=first_task_obj.name, ordinal=1, start_date=timezone.now(), end_date=timezone.now(),
-                                   deadline = timezone.now(), description = "abcdefgh", workflow = workflow_inst)
+                                   deadline = timezone.now(), description = "abcdefgh", workflow = workflow_inst, role = group)
         first_task_isnt.save()
     
     def get_task(self, name):
@@ -134,13 +161,18 @@ class WorkflowOM():
             next_task_inst.save()
             
 class TaskOM():
-    def __init__(self, name="", next_tasks=[]):
+    def __init__(self, name="", next_tasks=[], role = None):
         self.name = name
         self.next_tasks = next_tasks
+        self.role = role
 
 class NextTaskOM():
     def __init__(self, names=[]):
         self.names = names
+
+class RoleOM():
+    def __init__(self, name=""):
+        self.name = name
 
 class NameOM(): 
     def __init__(self, value=None):
