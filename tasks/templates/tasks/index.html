@@ -20,15 +20,14 @@
 
 <table>
   <tr>
-  {% if tasks|length > 1%}
+  {% if tasks|length > 0%}
     <th colspan="2">Tasks</th>
   {% else %}
   	<th>Tasks</th>
   {% endif %}
   </tr>
   
-  
-  {% if tasks|length > 1%}
+  {% if tasks|length > 0%}
   {% for task in tasks %}
   <tr>	
 	<td>{{ task.name }}</td>
@@ -39,13 +38,11 @@
 	  </form>
 	</td>	
 	{% endfor %}
-	
 	{% else %}
 	<td><p>None</p></td>
   </tr>	
   {% endif %}
     
-  
 </table>
 
 <table>
