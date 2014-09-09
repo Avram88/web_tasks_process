@@ -63,6 +63,8 @@ class TaskSA(SemanticAction):
                 task.next_tasks = child.names
             if isinstance(child, RoleOM):
                 task.role = child.name
+            if isinstance(child, DescriptionOM):
+                task.description = child.text
                 
         return task
     
@@ -100,15 +102,31 @@ class RoleSA(SemanticAction):
            
         return role 
 
+class DescriprionSA(SemanticAction):
+    def first_pass(self, parser, node, children):   
+        description = DescriptionOM()
+        
+        for child in children:
+            if isinstance(child, TextOM):
+                description.text = child.value
+           
+        return description 
+
 class NameSA(SemanticAction):    
     def first_pass(self, parser, node, children):       
         return NameOM(str(node))
 
+class TextSA(SemanticAction):
+    def first_pass(self, parser, node, children):       
+        return TextOM(str(node))
+    
 workflow.sem = WorkflowSA()
 task.sem = TaskSA() 
 nextTask.sem = NextTaskSA()
 name.sem = NameSA()
 role.sem = RoleSA()
+description.sem = DescriprionSA()
+text.sem = TextSA()
 
 class WorkflowOM():
     def __init__(self, name="", tasks=[], role = None):
@@ -123,14 +141,12 @@ class WorkflowOM():
         workflow_inst.save()
         
         first_task_obj = self.tasks[0]        
-        
-        print first_task_obj.role
-        
+                
         #find group by name, __iexact for case-insensitive match
         group = Group.objects.get(name__iexact = first_task_obj.role)
         
         first_task_isnt = TaskInst(name=first_task_obj.name, ordinal=1, start_date=timezone.now(), end_date=timezone.now(),
-                                   deadline = timezone.now(), description = "abcdefgh", workflow = workflow_inst, role = group)
+                                   deadline = timezone.now(), description = first_task_obj.description, workflow = workflow_inst, role = group)
         first_task_isnt.save()
     
     def get_task(self, name):
@@ -147,24 +163,29 @@ class WorkflowOM():
         task = TaskInst.objects.get(pk=task_id)
         task.finished = True
         task.user = finished_by_user
-        task.save()        
-        
-        if next_task_name is not None:
-#         for tsk in self.tasks:
-#             if tsk.name == next_task_name:
-#                 next_task_desc = tsk.description
-                
-            workflow_inst = WorkflowInst.objects.get(pk=task.workflow_id)        
+        task.save()      
+            
+        if next_task_name is not None:         
                     
+            for tsk in self.tasks:
+                if tsk.name == next_task_name:
+                    next_task_obj = tsk 
+                    
+            workflow_inst = WorkflowInst.objects.get(pk=task.workflow_id)   
+                                      
+            #find group by name, __iexact for case-insensitive match
+            group = Group.objects.get(name__iexact = next_task_obj.role)
+        
             next_task_inst = TaskInst(name = next_task_name, ordinal = task.ordinal + 1, start_date=timezone.now(), end_date=timezone.now(),
-                                       deadline = timezone.now(), description = "next_task_desc", workflow = workflow_inst)
+                                       deadline = timezone.now(), description = "next_task_desc", workflow = workflow_inst, role = group)
             next_task_inst.save()
             
 class TaskOM():
-    def __init__(self, name="", next_tasks=[], role = None):
+    def __init__(self, name="", next_tasks=[], role = None, description = ""):
         self.name = name
         self.next_tasks = next_tasks
         self.role = role
+        self.description = description
 
 class NextTaskOM():
     def __init__(self, names=[]):
@@ -173,6 +194,14 @@ class NextTaskOM():
 class RoleOM():
     def __init__(self, name=""):
         self.name = name
+
+class DescriptionOM():
+    def __init__(self, text=""):
+        self.text = text
+
+class TextOM():
+    def __init__(self,  value=None):
+        self.value = value
 
 class NameOM(): 
     def __init__(self, value=None):

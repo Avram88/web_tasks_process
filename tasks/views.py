@@ -22,6 +22,7 @@ def index(request):
                 
     return render(request, 'tasks/index.html', {'model_names':model_names, 'tasks':tasks})
 
+@login_required
 def detail(request, task_id):   
     task = TaskInst.objects.get(pk=task_id)      
     model_name = WorkflowInst.objects.get(pk=task.workflow_id).type
@@ -33,6 +34,7 @@ def detail(request, task_id):
 def auth_login(request):    
     return render(request, 'tasks/login.html')
     
+@login_required
 def auth_logout(request):
     logout(request)
     return render(request, 'tasks/login.html')
@@ -50,12 +52,14 @@ def sign_in(request):
     else:
         return redirect('tasks:login')
     
+@login_required
 def start_process(request, model_name):
     workflow_obj = get_workflow_object(model_name)    
     workflow_obj.start(request.user)
     
     return redirect('tasks:index')
 
+@login_required
 def finish_task(request, task_id):
     next_task_name = request.POST.get('next_task_name', None)  
       
