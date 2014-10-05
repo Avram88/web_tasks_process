@@ -31,6 +31,14 @@
    <td>Description</td>
    <td>{{ task.description }}</td>
  </tr>
+ <tr>
+   <td>Start date</td>
+   <td>{{ task.start_date }}</td>
+ </tr>
+ <tr>
+   <td>Deadline</td>
+   <td>{{ task.deadline }}</td>
+ </tr>
  <form action="{% url 'tasks:finish_task' task.id %}" method="post">
  <tr>
    <td>Next tasks</td>   

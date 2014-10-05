@@ -3,75 +3,166 @@
 {% load staticfiles %}
 
 <head>
-<title>Tasks</title>
-<link rel="stylesheet" href="{% static 'tasks/css/style.css' %}" type="text/css" />
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="description" content="">
+	<meta name="author" content="">
+	<link rel="icon" href="../../favicon.ico">
+	
+	<title>Workflow processes</title>
+
+   	<link href="{% static 'tasks/css/bootstrap.min.css' %}" rel="stylesheet">
+   	<link href="{% static 'tasks/css/dashboard.css' %}" rel="stylesheet">
+	<link href="{% static 'tasks/css/bootstrap-combobox.css' %}" media="screen" rel="stylesheet" type="text/css">
 </head>
 
-<body>
-<div>
+
+<!-- <div>
   <form action="{% url 'tasks:logout' %}" method="post">
-    {% csrf_token %}
-    {{user.first_name}} {{user.last_name}}  
+    {% csrf_token %} 
     <input type="submit" id="start" value="Logout" />
   </form>
-</div>
+</div> -->
 
-<br>
 
-<table>
-  <tr>
-  {% if tasks|length > 0%}
-    <th colspan="2">Tasks</th>
-  {% else %}
-  	<th>Tasks</th>
-  {% endif %}
-  </tr>
-  
-  {% if tasks|length > 0%}
-  {% for task in tasks %}
-  <tr>	
-	<td>{{ task.name }}</td>
-	<td style="width: 30px;">
-	  <form action="{% url 'tasks:detail' task.id %}" method="post">
-	  {% csrf_token %}
-	  <input type="submit" id="start" value="View" />
-	  </form>
-	</td>	
-	{% endfor %}
-	{% else %}
-	<td><p>None</p></td>
-  </tr>	
-  {% endif %}
-    
-</table>
 
-<table>
-  <tr>
-  {% if model_names|length > 1%}
-    <th colspan="2">Processes</th>
-  {% else %}
-  	<th>Processes</th>
-  {% endif %}
-  </tr>
-  
-  {% if model_names|length > 1%}
-  {% for model_name in model_names %}					  				  					
-  <tr>	
-	<td>{{ model_name }}</td>
-	<td style="width: 30px;" valign="top">
-	  <form action="{% url 'tasks:start_process' model_name %}" method="post">
-	  {% csrf_token %}
-	  <input type="submit" id="start" value="Start" />
-	  </form>
-	</td>	
-  					  				
-  {% endfor %}
-  {% else %}
-  <td><p>None</p></td>
-  </tr> 
-  {% endif %}
-  
-</table>
+<body>
 
-</body>
+    <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+      <div class="container-fluid">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="#">Hello {{user.first_name}} {{user.last_name}}!</a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav navbar-right">
+            <li><a href="#">Dashboard</a></li>
+            <li><a href="#">Settings</a></li>
+            <li><a href="#">Profile</a></li>
+            <li><a href="#">Logout</a></li>
+          </ul>
+          <form class="navbar-form navbar-right">
+            <input type="text" class="form-control" placeholder="Search...">
+          </form>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-sm-3 col-md-2 sidebar">
+          <ul class="nav nav-sidebar">
+            <li class="active"><a href="#">Processes</a></li>
+          </ul>
+          {% for model_name in model_names %}
+		  <div class="row" style="padding-bottom:5px">
+		  	<form action="{% url 'tasks:start_process' model_name %}" method="post">
+		  	{% csrf_token %}		  
+			<div class="col-sm-9">{{ model_name }}</div>
+			<div class="col-sm-3"><input type="submit" id="start" class="btn btn-info pull-right" value="Start" /></div>
+			</form>
+		  </div>
+		  {% endfor %}
+        </div>
+		
+        <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">         
+
+          <h2 class="page-header">Tasks</h2>
+          <div class="table-responsive">
+            <table class="table table-striped">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Name</th>
+                  <th>Start date</th>
+                  <th>Deadline</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>  		
+              	{% for task in tasks %}
+                <tr>
+                  <td>1</td>
+                  <td>{{ task.name }}</td>
+                  <td>{{ task.start_date }}</td>
+                  <td>{{ task.deadline }}</td>
+                  <td>
+                  	<form action="{% url 'tasks:detail' task.id %}" method="post">
+		  				{% csrf_token %}
+		  				<input type="submit" name="submit" id="submit" value="View" class="btn btn-info">
+		  			</form>                  	
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+		  <h2 class="sub-header">Detail</h2>
+		  <div class="row">
+			<form role="form">
+				<div class="col-lg-6">
+					<div class="form-group">
+						<label for="InputName">Name</label>
+						<div class="input-group">
+							<input type="text" class="form-control" name="InputName" id="InputName" required>
+							<span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
+						</div>
+					</div>
+					<div class="form-group">
+						<label for="InputEmail">Start date</label>
+						<div class="input-group">
+							<input type="email" class="form-control" id="InputEmailFirst" name="InputEmail"required>
+							<span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
+						</div>
+					</div>
+					<div class="form-group">
+						<label for="InputEmail">Deadline</label>
+						<div class="input-group">
+							<input type="email" class="form-control" id="InputEmailSecond" name="InputEmail" required>
+							<span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
+						</div>
+					</div>
+				</div>
+			</form>
+			<div class="col-lg-5 col-md-push-1">
+				<div class="form-group">
+					<label for="InputMessage">Description</label>
+					<div class="input-group">
+						<textarea name="InputMessage" id="InputMessage" class="form-control" rows="5" required></textarea>
+						<span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
+					</div>
+				</div>
+				<div class="form-group">
+					<label>Next task</label>
+					<select class="combobox input-large form-control" name="normal">
+					  <option value="" selected="selected">Select a task</option>
+					  <option value="AL">Alabama</option>
+					  <option value="AK">Alaska</option>
+					  <option value="AZ">Arizona</option>
+					</select>
+				  </div>
+				<input type="submit" name="submit" id="submit" value="Finish" class="btn btn-info pull-right">
+			</div>
+		</div>
+        </div>
+      </div>
+    </div>
+	<script src="js/jquery-1.11.1.min.js" type="text/javascript"></script>
+    <script src="js/bootstrap.min.js" type="text/javascript"></script>
+    <script src="js/bootstrap-combobox.js" type="text/javascript"></script>
+    <script type="text/javascript">
+      //<![CDATA[
+        $(document).ready(function(){
+          $('.combobox').combobox()
+        });
+      //]]>
+    </script>
+  </body>
+
 </html>

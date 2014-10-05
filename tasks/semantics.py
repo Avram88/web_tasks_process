@@ -1,15 +1,15 @@
 from arpeggio import ZeroOrMore, Kwd, Optional, RegExMatch as _, ParserPython, \
-    SemanticAction, OneOrMore, EndOfFile
+    SemanticAction, OneOrMore, EOF
 from models import WorkflowInst, TaskInst
 from django.contrib.auth.models import Group
 from django.utils import timezone
 import os
 
-def workflow():         return Kwd('workflow'), name, open_bracket, ZeroOrMore(role), Optional(description), OneOrMore(task), close_bracket, EndOfFile
+def workflow():         return Kwd('workflow'), name, open_bracket, ZeroOrMore(role), Optional(description), OneOrMore(task), close_bracket, EOF
 def task():             return Kwd('task'), name, open_bracket, ZeroOrMore(role), ZeroOrMore(nextTask), ZeroOrMore(grType), ZeroOrMore(endTime), ZeroOrMore(exitCondition), Optional(description), close_bracket
 def nextTask():         return Kwd('next'), colon, OneOrMore(name, Optional(comma)), semicomma
 def grType():           return Kwd('type'), colon, [Kwd('automatic'), Kwd('manual')], semicomma
-def endTime():          return Kwd('deadline'), colon, number, "H", semicomma
+def endTime():          return Kwd('deadline'), colon, number, _(r"\H"), semicomma
 def exitCondition():    return Kwd('exitCondition'), colon, name, semicomma
 def role():             return Kwd('role'), colon, OneOrMore(name, Optional(comma)), semicomma
 def description():      return Kwd('description'), colon, quote, text, quote, semicomma
@@ -18,12 +18,12 @@ def name():             return _(r"\w+")
 def number():           return _(r"\d+")
 def text():             return _(r"[\w\s]+")
     
-def open_bracket():     return '('
-def close_bracket():    return ')'
-def colon():            return ':'
-def comma():            return ','
-def semicomma():        return ';'   
-def quote():            return '"' 
+def open_bracket():     return _(r"\(")
+def close_bracket():    return _(r"\)")
+def colon():            return _(r"\:")
+def comma():            return _(r"\,")
+def semicomma():        return _(r"\;")  
+def quote():            return _(r"\"") 
 
 def get_workflow_object(model_name):
     model_dir = "D:\\Fax\\master_rad\\projekat\\web_tasks_process\\tasks\\models\\"
