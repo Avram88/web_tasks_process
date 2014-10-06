@@ -4,6 +4,7 @@ from models import WorkflowInst, TaskInst
 from django.contrib.auth.models import Group
 from django.utils import timezone
 import os
+from web_tasks_process.settings import PROJECT_PATH
 
 def workflow():         return Kwd('workflow'), name, open_bracket, ZeroOrMore(role), Optional(description), OneOrMore(task), close_bracket, EOF
 def task():             return Kwd('task'), name, open_bracket, ZeroOrMore(role), ZeroOrMore(nextTask), ZeroOrMore(grType), ZeroOrMore(endTime), ZeroOrMore(exitCondition), Optional(description), close_bracket
@@ -26,7 +27,7 @@ def semicomma():        return _(r"\;")
 def quote():            return _(r"\"") 
 
 def get_workflow_object(model_name):
-    model_dir = "D:\\Fax\\master_rad\\projekat\\web_tasks_process\\tasks\\models\\"
+    model_dir = os.path.join(PROJECT_PATH, 'tasks\\models\\');
     full_path = model_dir + str(model_name) + ".wf"
     
     if os.path.exists(os.path.dirname(full_path)):

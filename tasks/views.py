@@ -4,22 +4,21 @@ from django.contrib.auth.decorators import login_required
 import glob, os
 from semantics import get_workflow_object
 from models import TaskInst, WorkflowInst
+from web_tasks_process.settings import PROJECT_PATH
 
 @login_required
 def index(request):        
-    model_dir = "D:\\Fax\\master_rad\\projekat\\web_tasks_process\\tasks\\models\\"
-    ext = "*.wf"
-    models = glob.glob(model_dir + ext)
-    
+    model_dir = os.path.join(PROJECT_PATH, 'tasks\\models\\');
+    ext = "*.wf"    
+    models = glob.glob(model_dir + ext)    
     model_names = []
     
     for file_name in models:
-        model_names.append(os.path.basename(file_name)[:-3])   
+        model_names.append(os.path.basename(file_name)[:-3])  
                     
-    user_roles = request.user.groups.all()
-                    
-    tasks = TaskInst.objects.filter(finished = False, role = user_roles[0])
-                
+    user_roles = request.user.groups.all()                    
+    tasks = TaskInst.objects.filter(finished = False, role = user_roles[0])     
+               
     return render(request, 'tasks/index.html', {'model_names':model_names, 'tasks':tasks})
 
 @login_required
