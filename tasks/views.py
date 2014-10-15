@@ -64,6 +64,8 @@ def start_process(request, model_name):
 def finish_task(request):
     task_id = request.POST.get('task_id', None)
     next_task_name = request.POST.get('next_task_name', None)  
+    if next_task_name == "":
+        next_task_name = None
         
     task = TaskInst.objects.get(pk=task_id)
     model_name = WorkflowInst.objects.get(pk=task.workflow_id).type
