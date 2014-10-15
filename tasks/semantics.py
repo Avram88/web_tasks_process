@@ -154,9 +154,13 @@ class WorkflowOM():
         pass
     
     def get_next_task_names(self, name):
+        names = []
+        
         for task in self.tasks:
             if task.name == name:
-                return task.next_tasks
+                for next_task in task.next_tasks:
+                    names.append(next_task.name)
+                return names
         
         return None
     

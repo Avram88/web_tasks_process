@@ -1,6 +1,7 @@
 <html>
 
 {% load staticfiles %}
+{% load jsonify %}
 
 <head>
 	<meta charset="utf-8">
@@ -8,17 +9,15 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<meta name="description" content="">
 	<meta name="author" content="">
-	<!--<link rel="icon" href="../../favicon.ico">-->
 	
 	<title>Workflow processes</title>
 	<link rel="stylesheet" href="{% static 'tasks/css/reset.css' %}" type="text/css" />
    	<link href="{% static 'tasks/css/bootstrap.min.css' %}" rel="stylesheet">
    	<link href="{% static 'tasks/css/dashboard.css' %}" rel="stylesheet">
-	<link href="{% static 'tasks/css/bootstrap-combobox.css' %}" media="screen" rel="stylesheet" type="text/css">
+	<link href="{% static 'tasks/css/bootstrap-combobox.css' %}" media="screen" rel="stylesheet" type="text/css">		
 </head>
 
 <body>
-
     <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
       <div class="container-fluid">
         <div class="navbar-header">
@@ -78,15 +77,12 @@
               <tbody>  		
               	{% for task in tasks %}
                 <tr>
-                  <td>1</td>
+                  <td>{{ forloop.counter }}</td>
                   <td>{{ task.name }}</td>
                   <td>{{ task.start_date }}</td>
                   <td>{{ task.deadline }}</td>
                   <td>
-                  	<form action="{% url 'tasks:detail' task.id %}" method="post">
-		  				{% csrf_token %}
-		  				<input type="submit" name="submit" id="submit" value="View" class="btn btn-info">
-		  			</form>                  	
+		  			<input type="submit" id="{{forloop.counter0}}" value="View" class="btn btn-info">            	
                   </td>
                 </tr>
                 {% endfor %}
@@ -98,23 +94,23 @@
 			<form role="form">
 				<div class="col-lg-6">
 					<div class="form-group">
-						<label for="InputName">Name</label>
+						<label for="name">Name</label>
 						<div class="input-group">
-							<input type="text" class="form-control" name="InputName" id="InputName" required>
+							<input type="text" class="form-control" name="name" id="name" value="{{ task.name }}" required>
 							<span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
 						</div>
 					</div>
 					<div class="form-group">
-						<label for="InputEmail">Start date</label>
+						<label for="start_date">Start date</label>
 						<div class="input-group">
-							<input type="email" class="form-control" id="InputEmailFirst" name="InputEmail"required>
+							<input type="email" class="form-control" id="start_date" name="start_date"required>
 							<span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
 						</div>
 					</div>
 					<div class="form-group">
-						<label for="InputEmail">Deadline</label>
+						<label for="deadline">Deadline</label>
 						<div class="input-group">
-							<input type="email" class="form-control" id="InputEmailSecond" name="InputEmail" required>
+							<input type="email" class="form-control" id="deadline" name="deadline" required>
 							<span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
 						</div>
 					</div>
@@ -122,22 +118,24 @@
 			</form>
 			<div class="col-lg-5 col-md-push-1">
 				<div class="form-group">
-					<label for="InputMessage">Description</label>
+					<label for="description">Description</label>
 					<div class="input-group">
-						<textarea name="InputMessage" id="InputMessage" class="form-control" rows="5" required></textarea>
+						<textarea name="description" id="description" class="form-control" rows="5" required></textarea>
 						<span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
 					</div>
 				</div>
 				<div class="form-group">
 					<label>Next task</label>
 					<select class="combobox input-large form-control" name="normal">
-					  <option value="" selected="selected">Select a task</option>
-					  <option value="AL">Alabama</option>
-					  <option value="AK">Alaska</option>
-					  <option value="AZ">Arizona</option>
+					  <option value="" selected="selected"></option>
 					</select>
 				  </div>
-				<input type="submit" name="submit" id="submit" value="Finish" class="btn btn-info pull-right">
+				  <form id="finish" action="{% url 'tasks:finish_task' %}" method="post">
+				  	{% csrf_token %}
+				  	<input type="hidden" id="task_id" name="task_id">
+				  	<input type="hidden" id="next_task_name" name="next_task_name">
+					<input type="submit" name="submit" id="submit" value="Finish" class="btn btn-info pull-right">
+				  </form>
 			</div>
 		</div>
         </div>
@@ -150,7 +148,33 @@
     <script type="text/javascript">
       //<![CDATA[
         $(document).ready(function(){
-          $('.combobox').combobox()
+        	var next_tasks = JSON.parse('{{ next_tasks|jsonify }}');
+          	var tasks = JSON.parse('{{ tasks|jsonify }}');
+          	
+          $('.btn').click(function(event){
+
+        	 var task_id = tasks[event.target.id].pk;
+        	 alert(task_id);
+        	 var task = tasks[event.target.id].fields;
+        	 var next = next_tasks[event.target.id];        	 
+        		 
+        	 $('#name').val(task.name);
+        	 $('#start_date').val(task.start_date);
+        	 $('#deadline').val(task.deadline);
+        	 $('#description').val(task.description);
+        	 
+        	 $('.combobox').empty();
+        	 $('.combobox').append('<option value="" selected="selected"></option>');
+        	 $.each(next, function(index, value){
+        		  $('.combobox').append('<option>' + value + '</option>');
+        	 });    
+  
+        	 $('#task_id').val(task_id);
+          });   
+          
+          $('.combobox').change(function(){
+        	  $('#next_task_name').val($('.combobox').find(':selected').text());
+          });
         });
       //]]>
     </script>
