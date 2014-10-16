@@ -10,11 +10,17 @@ def workflow():         return Kwd('workflow'), name, open_bracket, ZeroOrMore(r
 def task():             return Kwd('task'), name, open_bracket, ZeroOrMore(role), ZeroOrMore(nextTask), ZeroOrMore(grType), ZeroOrMore(endTime), ZeroOrMore(exitCondition), Optional(description), close_bracket
 def nextTask():         return Kwd('next'), colon, OneOrMore(name, Optional(comma)), semicomma
 def grType():           return Kwd('type'), colon, [Kwd('automatic'), Kwd('manual')], semicomma
-def endTime():          return Kwd('deadline'), colon, number, _(r"\H"), semicomma
+def endTime():          return Kwd('deadline'), colon, time, semicomma
 def exitCondition():    return Kwd('exitCondition'), colon, name, semicomma
 def role():             return Kwd('role'), colon, OneOrMore(name, Optional(comma)), semicomma
 def description():      return Kwd('description'), colon, quote, text, quote, semicomma
- 
+
+def time():             return days, colon, hours, colon, minutes
+
+def days():             return number, _(r"D")
+def hours():            return number, _(r"H")
+def minutes():          return number, _(r"M")
+
 def name():             return _(r"\w+")
 def number():           return _(r"\d+")
 def text():             return _(r"[\w\s]+")
@@ -23,7 +29,7 @@ def open_bracket():     return _(r"\(")
 def close_bracket():    return _(r"\)")
 def colon():            return _(r"\:")
 def comma():            return _(r"\,")
-def semicomma():        return _(r"\;")  
+def semicomma():        return _(r"\;")
 def quote():            return _(r"\"") 
 
 def get_workflow_object(model_name):
@@ -66,6 +72,8 @@ class TaskSA(SemanticAction):
                 task.role = child.name
             if isinstance(child, DescriptionOM):
                 task.description = child.text
+            if isinstance(child, EndTimeOM):
+                task.deadline = child
                 
         return task
     
@@ -112,6 +120,54 @@ class DescriprionSA(SemanticAction):
                 description.text = child.value
            
         return description 
+    
+class EndTimeSA(SemanticAction):
+    def first_pass(self, parser, node, children): 
+        endTime = EndTimeOM()
+        
+        for child in children:
+            if isinstance(child, DaysOM):
+                endTime.days = child.value
+            if isinstance(child, HoursSA):
+                endTime.hours = child.value
+            if isinstance(child, MinutesSA):
+                endTime.minutes = child.value
+                
+        return endTime
+    
+class DaysSA(SemanticAction):
+    def first_pass(self, parser, node, children):
+        days = DaysOM()
+        
+        for child in children:
+            if isinstance(child, NumberSA):
+                days.value = child
+        
+        return days
+    
+class HoursSA(SemanticAction):
+    def first_pass(self, parser, node, children):
+        hours = HoursOM()
+        
+        for child in children:
+            if isinstance(child, NumberSA):
+                hours.value = child.value
+        
+        return hours
+    
+class MinutesSA(SemanticAction):
+    def first_pass(self, parser, node, children):
+        minutes = MinutesOM()
+        
+        for child in children:
+            if isinstance(child, NumberSA):
+                minutes.value = child.value
+        
+        return minutes
+    
+class NumberSA(SemanticAction):
+    def first_pass(self, parser, node, children):
+        return NumberOM(str(node))
 
 class NameSA(SemanticAction):    
     def first_pass(self, parser, node, children):       
@@ -128,6 +184,11 @@ name.sem = NameSA()
 role.sem = RoleSA()
 description.sem = DescriprionSA()
 text.sem = TextSA()
+number.sem = NumberSA()
+endTime.sem = EndTimeSA()
+days.sem = DaysSA()
+hours.sem = HoursSA()
+minutes.sem = MinutesSA()
 
 class WorkflowOM():
     def __init__(self, name="", tasks=[], role = None):
@@ -142,7 +203,9 @@ class WorkflowOM():
         workflow_inst.save()
         
         first_task_obj = self.tasks[0]        
-                
+        
+        print 'avram'
+        print first_task_obj.deadline.days
         #find group by name, __iexact for case-insensitive match
         group = Group.objects.get(name__iexact = first_task_obj.role)
         
@@ -200,11 +263,32 @@ class RoleOM():
     def __init__(self, name=""):
         self.name = name
 
+class EndTimeOM():
+    def __init__(self, time=None):
+        self.days = days
+        self.hours = hours
+        self.minutes = minutes
+
+class DaysOM():    def __init__(self, value=None):
+        self.value = value
+
+class HoursOM():
+    def __init__(self, value=None):
+        self.value = value
+
+class MinutesOM():
+    def __init__(self, value=None):
+        self.value = value
+        
 class DescriptionOM():
     def __init__(self, text=""):
         self.text = text
 
 class TextOM():
+    def __init__(self,  value=None):
+        self.value = value
+
+class NumberOM():
     def __init__(self,  value=None):
         self.value = value
 
